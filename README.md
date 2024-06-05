@@ -28,7 +28,29 @@ def preprocess(features):
 
 train_data = train_data.map(preprocess).batch(32)
 ```
+#### Step 3: Define the Quantum Layer
+#Here, we will define a simple quantum circuit using Pennylane.
 
+```python
+
+import pennylane as qml
+
+n_qubits = 4
+dev = qml.device('default.qubit', wires=n_qubits)
+
+@qml.qnode(dev)
+def quantum_circuit(inputs):
+    for i in range(n_qubits):
+        qml.RY(inputs[i], wires=i)
+    qml.CZ(wires=[0, 1])
+    qml.CZ(wires=[2, 3])
+    for i in range(n_qubits):
+        qml.RY(inputs[i], wires=i)
+    return [qml.expval(qml.PauliZ(i)) for i in range(n_qubits)]
+
+def quantum_layer(inputs):
+    return tf.convert_to_tensor([quantum_circuit(inputs) for inputs in inputs.numpy()])
+```
 
 
 

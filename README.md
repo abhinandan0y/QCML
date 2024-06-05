@@ -12,7 +12,9 @@ pip install tensorflow_datasets
 ```
 #### Step 2: Prepare the Data
 Use a remote sensing dataset. For this example, we will use the EuroSAT dataset available via TensorFlow Datasets.
-```
+
+```python
+
 import tensorflow as tf
 import tensorflow_datasets as tfds
 

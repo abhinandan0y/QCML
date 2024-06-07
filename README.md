@@ -123,6 +123,21 @@ for epoch in range(epochs):
     print(f'Training accuracy over epoch {epoch+1}: {train_acc.numpy()}')
     train_acc_metric.reset_states()
 ```
+#### Save the model
+```python
+model.save('hybrid_model.h5')
+```
+
+#### Load the saved model
+```python
+loaded_model = tf.keras.models.load_model('hybrid_model.h5', custom_objects={'quantum_layer': quantum_layer})
+
+# Evaluate the loaded model to verify it works correctly
+val_loss, val_accuracy = loaded_model.evaluate(val_data)
+
+print("Loaded Model Validation Loss:", val_loss)
+print("Loaded Model Validation Accuracy:", val_accuracy)
+```
 
 #### Step 5: Evaluate the Model
 #Evaluate the model's performance on a validation dataset.

@@ -238,6 +238,8 @@ for epoch in range(epochs):
     print(f'Training accuracy over epoch {epoch+1}: {train_acc.numpy()}')
     train_acc_metric.reset_states()
 ``` 
+####
+<img src="https://www.bioinformaticsfuture.com/images/BioInformatics_lab.png" style="width: 100%;" alt="bioinformatics_lab.png">
 
 #### Step 5: Test/ Evaluate the Model
 #Evaluate the model's performance on a validation dataset.

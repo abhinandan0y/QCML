@@ -126,6 +126,12 @@ for epoch in range(epochs):
 #### Save the model
 ```python
 model.save('hybrid_model.h5')
+
+or simply
+model.save('saved_model')
+
+# Load the model
+loaded_model = tf.keras.models.load_model('saved_model', custom_objects={'quantum_layer': quantum_layer})
 ```
 
 #### Load the saved model

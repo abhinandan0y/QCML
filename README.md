@@ -123,6 +123,36 @@ for epoch in range(epochs):
     print(f'Training accuracy over epoch {epoch+1}: {train_acc.numpy()}')
     train_acc_metric.reset_states()
 ```
+#### model details
+```python
+>>> model.summary()
+Model: "hybrid_model"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ conv2d (Conv2D)             multiple                  896       
+                                                                 
+ max_pooling2d (MaxPooling2  multiple                  0         
+ D)                                                              
+                                                                 
+ conv2d_1 (Conv2D)           multiple                  18496     
+                                                                 
+ max_pooling2d_1 (MaxPoolin  multiple                  0         
+ g2D)                                                            
+                                                                 
+ flatten (Flatten)           multiple                  0         
+                                                                 
+ dense (Dense)               multiple                  50180     
+                                                                 
+ dense_1 (Dense)             multiple                  50        
+                                                                 
+=================================================================
+Total params: 69622 (271.96 KB)
+Trainable params: 69622 (271.96 KB)
+Non-trainable params: 0 (0.00 Byte)
+_________________________________________________________________
+```
+
 #### Save the model
 ```python
 model.save('hybrid_model.h5') #NotImplementedError: Saving the model to HDF5 format requires the model to be a Functional model or a Sequential model. It does not work for subclassed models, because such models are defined via the body of a Python method, which isn't safely serializable. Consider saving to the Tensorflow SavedModel format (by setting save_format="tf") or using `save_weights`.

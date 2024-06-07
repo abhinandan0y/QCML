@@ -14,6 +14,7 @@ pip install tensorflow_datasets
 Use a remote sensing dataset. For this example, we will use the EuroSAT dataset available via TensorFlow Datasets.
 
 <img src="https://github.com/abhinandan0y/QCML/blob/main/img/Eurosat.jpg" style="width: 100%;" alt="EuroSAT.jpg">
+
 ```python
 
 import tensorflow as tf

@@ -98,6 +98,17 @@ validation_data = dataset['test'].map(preprocess).batch(32)
 model.evaluate(validation_data)
 ```
 
+#### Monitor Training Progress:
+You can use TensorBoard to monitor training progress. First, install TensorBoard using pip install tensorboard. Then, add the following code to your existing script to enable TensorBoard:
+```python
+# Add TensorBoard callback
+tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir="./logs", histogram_freq=1)
+
+# Train the model with TensorBoard callback
+model.fit(train_data, epochs=10, callbacks=[tensorboard_callback])
+You can then visualize the training metrics using the TensorBoard interface by running tensorboard --logdir=./logs in the terminal and navigating to http://localhost:6006 in your web browser.
+
+```
 ### Exercise
 ```
 Experiment with different quantum circuits: Modify the quantum_circuit function to use different quantum gates and configurations.

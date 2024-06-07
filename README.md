@@ -240,7 +240,7 @@ for epoch in range(epochs):
 ```
 
 #### Tensorboard Training view
-<img src="https://github.com/abhinandan0y/QCML/tree/main/img/TrainAccLoss.png" style="width: 100%;" alt="TrainingResults.png">
+<img src="https://github.com/abhinandan0y/QCML/blob/main/img/TrainAccLoss.png" style="width: 100%;" alt="TrainingResults.png">
 
 #### Step 5: Test/ Evaluate the Model
 #Evaluate the model's performance on a validation dataset.

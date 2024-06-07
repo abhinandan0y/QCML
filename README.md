@@ -129,6 +129,9 @@ model.save('hybrid_model.h5') #NotImplementedError: Saving the model to HDF5 for
 
 # Save the model in TensorFlow SavedModel format
 model.save('saved_model', save_format='tf')
+>>> model.save('QCML_v1_model', save_format='tf')
+INFO:tensorflow:Assets written to: QCML_v1_model/assets
+INFO:tensorflow:Assets written to: QCML_v1_model/assets
 
 or simply
 model.save('saved_model')

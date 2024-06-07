@@ -237,9 +237,10 @@ for epoch in range(epochs):
     train_acc = train_acc_metric.result()
     print(f'Training accuracy over epoch {epoch+1}: {train_acc.numpy()}')
     train_acc_metric.reset_states()
-``` 
-####
-<img src="https://www.bioinformaticsfuture.com/images/BioInformatics_lab.png" style="width: 100%;" alt="bioinformatics_lab.png">
+```
+
+#### Tensorboard Training view
+<img src="https://github.com/abhinandan0y/QCML/tree/main/img/TrainAccLoss.png" style="width: 100%;" alt="TrainingResults.png">
 
 #### Step 5: Test/ Evaluate the Model
 #Evaluate the model's performance on a validation dataset.

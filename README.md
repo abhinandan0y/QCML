@@ -211,6 +211,9 @@ Validation Accuracy: 0.1666666716337204
 #### Monitor Training Progress:
 You can use TensorBoard to monitor training progress. First, install TensorBoard using pip install tensorboard. Then, add the following code to your existing script to enable TensorBoard:
 ```python
+from tensorflow.keras.callbacks import TensorBoard
+import datetime
+
 # Add TensorBoard callback
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir="./logs", histogram_freq=1)
 

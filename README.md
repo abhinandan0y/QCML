@@ -160,8 +160,13 @@ print("Loaded Model Validation Loss:", val_loss)
 print("Loaded Model Validation Accuracy:", val_accuracy)
 ```
 
-#### Running and Monitor Training Progress:
+#### Tain & Monitor Training Progress:
 You can use TensorBoard to monitor training progress. First, install TensorBoard using pip install tensorboard. Then, add the following code to your existing script to enable TensorBoard:
+
+```bash
+#Start tensorboard
+tensorboard --logdir logs/fit
+```
 ```python
 from tensorflow.keras.callbacks import TensorBoard
 import datetime
@@ -169,8 +174,6 @@ import datetime
 # Add TensorBoard callback
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir="./logs", histogram_freq=1)
 
-#Start tensorboard
-tensorboard --logdir logs/fit
 
 # Train the model with TensorBoard callback
 model.fit(train_data, epochs=10, callbacks=[tensorboard_callback])
@@ -212,7 +215,31 @@ for epoch in range(epochs):
 You can then visualize the training metrics using the TensorBoard interface by running tensorboard --logdir=./logs in the terminal and navigating to http://localhost:6006 in your web browser.
 ```
 
-#### Step 5: Evaluate the Model
+#### Training model : Custom training loop
+```python
+loss_fn = tf.keras.losses.SparseCategoricalCrossentropy()
+optimizer = tf.keras.optimizers.Adam()
+train_acc_metric = tf.keras.metrics.SparseCategoricalAccuracy()
+
+epochs = 10
+
+for epoch in range(epochs):
+    print(f'Start of epoch {epoch+1}')
+    for step, (x_batch_train, y_batch_train) in enumerate(train_data):
+        with tf.GradientTape() as tape:
+            logits = model(x_batch_train, training=True)
+            loss_value = loss_fn(y_batch_train, logits)
+        grads = tape.gradient(loss_value, model.trainable_weights)
+        optimizer.apply_gradients(zip(grads, model.trainable_weights))
+        train_acc_metric.update_state(y_batch_train, logits)
+        if step % 100 == 0:
+            print(f'Epoch {epoch+1} Step {step} Loss {loss_value.numpy()} Accuracy {train_acc_metric.result().numpy()}')
+    train_acc = train_acc_metric.result()
+    print(f'Training accuracy over epoch {epoch+1}: {train_acc.numpy()}')
+    train_acc_metric.reset_states()
+``` 
+
+#### Step 5: Test/ Evaluate the Model
 #Evaluate the model's performance on a validation dataset.
 
 ```python

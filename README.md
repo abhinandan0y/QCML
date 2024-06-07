@@ -125,7 +125,10 @@ for epoch in range(epochs):
 ```
 #### Save the model
 ```python
-model.save('hybrid_model.h5')
+model.save('hybrid_model.h5') #NotImplementedError: Saving the model to HDF5 format requires the model to be a Functional model or a Sequential model. It does not work for subclassed models, because such models are defined via the body of a Python method, which isn't safely serializable. Consider saving to the Tensorflow SavedModel format (by setting save_format="tf") or using `save_weights`.
+
+# Save the model in TensorFlow SavedModel format
+model.save('saved_model', save_format='tf')
 
 or simply
 model.save('saved_model')

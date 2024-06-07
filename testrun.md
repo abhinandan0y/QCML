@@ -1,4 +1,4 @@
-Python 3.10.9 (main, Mar  1 2023, 18:23:06) [GCC 11.2.0] on linux
+```python 3.10.9 (main, Mar  1 2023, 18:23:06) [GCC 11.2.0] on linux
 Type "help", "copyright", "credits" or "license" for more information.
 >>> import tensorflow as tf
 2024-06-07 14:17:16.238228: I external/local_tsl/tsl/cuda/cudart_stub.cc:32] Could not find cuda drivers on your machine, GPU will not be used.

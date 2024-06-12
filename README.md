@@ -1,6 +1,5 @@
 # QCML
 
-Some practical code and exercise 
 To implement Hybrid Quantum Neural Networks for Remote Sensing Imagery Classification. 
 Also links to do analysis on remote sensing  image classification
 

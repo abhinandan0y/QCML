@@ -298,7 +298,7 @@ Validation Accuracy: 0.1666666716337204
 #Monitor Training Progress: 
     Visualize training metrics like loss and accuracy over epochs using tools like TensorBoard to identify potential issues or areas for improvement.
 ```
-## For Running on IBM Quantum computer
+## For Running on GOOGLE Quantum computer
 
 ```bash
 #Create environment

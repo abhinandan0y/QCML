@@ -1,5 +1,5 @@
 # QCML
-## Classical-quantum model   ### Run on IBM Quantum computer
+## For running on Classical Systems
 To implement Hybrid Quantum Neural Networks for Remote Sensing Imagery Classification. 
 Also links to do analysis on remote sensing  image classification
 
@@ -299,4 +299,140 @@ Validation Accuracy: 0.1666666716337204
 
 #Monitor Training Progress: 
     Visualize training metrics like loss and accuracy over epochs using tools like TensorBoard to identify potential issues or areas for improvement.
+```
+## For Running on IBM Quantum computer
+
+```bash
+
+pip install qiskit pennylane tensorflow numpy matplotlib tensorflow_datasets
+```
+#### Step 2: Prepare the Data
+The data preparation part remains unchanged:
+
+```python
+
+import tensorflow as tf
+import tensorflow_datasets as tfds
+import pennylane as qml
+import numpy as np
+from tensorflow.keras import layers, models
+
+# Load EuroSAT dataset
+dataset, info = tfds.load('eurosat/rgb', with_info=True)
+train_data, val_data = tfds.load('eurosat/rgb', split=['train[:80%]', 'train[80%:]'], as_supervised=True)
+
+# Preprocess the data
+def preprocess(image, label):
+    image = tf.image.resize(image, (64, 64)) / 255.0
+    return image, label
+
+train_data = train_data.map(preprocess).batch(32).prefetch(tf.data.experimental.AUTOTUNE)
+val_data = val_data.map(preprocess).batch(32)
+```
+#### Step 3: Define the Quantum Layer
+Here we will use Qiskit to define the quantum layer and run the quantum circuit on an IBM Quantum computer. You'll need your IBM Quantum Experience API token.
+
+Set up Qiskit and authenticate:
+```python
+
+from qiskit import Aer, IBMQ, transpile, assemble
+from qiskit.providers.ibmq import least_busy
+from qiskit.visualization import plot_histogram
+
+# Load your IBM Quantum Experience account
+IBMQ.save_account('YOUR_IBM_QUANTUM_API_TOKEN', overwrite=True)
+IBMQ.load_account()
+provider = IBMQ.get_provider(hub='ibm-q')
+```
+
+Define the quantum circuit and execute on IBM Quantum:
+```python
+
+def get_least_busy_backend():
+    backend = least_busy(provider.backends(filters=lambda x: x.configuration().n_qubits >= 4 and
+                                                    not x.configuration().simulator and x.status().operational==True))
+    print(f"Using backend: {backend}")
+    return backend
+
+def quantum_circuit(inputs):
+    backend = get_least_busy_backend()
+    circuit = qml.QNode(backend)
+
+    for i in range(n_qubits):
+        circuit.ry(inputs[i], wires=i)
+    circuit.cz(wires=[0, 1])
+    circuit.cz(wires=[2, 3])
+    for i in range(n_qubits):
+        circuit.ry(inputs[i], wires=i)
+    return [qml.expval(qml.PauliZ(i)) for i in range(n_qubits)]
+
+def quantum_layer(inputs):
+    inputs = tf.cast(inputs, dtype=tf.float32)
+    outputs = np.array([quantum_circuit(input) for input in inputs])
+    outputs = outputs.astype(np.float32)  # Ensure the numpy array is float32
+    return tf.convert_to_tensor(outputs, dtype=tf.float32)
+Step 4: Define the Model
+This part remains the same with minor adjustments for using the quantum layer:
+```
+```python
+
+class HybridModel(tf.keras.Model):
+    def __init__(self):
+        super(HybridModel, self).__init__()
+        self.conv1 = layers.Conv2D(32, (3, 3), activation='relu')
+        self.pool1 = layers.MaxPooling2D((2, 2))
+        self.conv2 = layers.Conv2D(64, (3, 3), activation='relu')
+        self.pool2 = layers.MaxPooling2D((2, 2))
+        self.flatten = layers.Flatten()
+        self.dense1 = layers.Dense(n_qubits, activation='relu')
+        self.dense2 = layers.Dense(10, activation='softmax')
+
+    def call(self, x):
+        x = self.conv1(x)
+        x = self.pool1(x)
+        x = self.conv2(x)
+        x = self.pool2(x)
+        x = self.flatten(x)
+        x = self.dense1(x)
+        x = tf.numpy_function(quantum_layer, [x], tf.float32)
+        x.set_shape((None, n_qubits))  # Ensure shape is set for the output of quantum layer
+        x = self.dense2(x)
+        return x
+
+model = HybridModel()
+model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+```
+#### Step 5: Training and Evaluation
+Training and evaluation processes remain the same:
+
+```python
+
+# Custom training loop
+loss_fn = tf.keras.losses.SparseCategoricalCrossentropy()
+optimizer = tf.keras.optimizers.Adam()
+train_acc_metric = tf.keras.metrics.SparseCategoricalAccuracy()
+
+epochs = 10
+
+for epoch in range(epochs):
+    print(f'Start of epoch {epoch+1}')
+    for step, (x_batch_train, y_batch_train) in enumerate(train_data):
+        with tf.GradientTape() as tape:
+            logits = model(x_batch_train, training=True)
+            loss_value = loss_fn(y_batch_train, logits)
+        grads = tape.gradient(loss_value, model.trainable_weights)
+        optimizer.apply_gradients(zip(grads, model.trainable_weights))
+        train_acc_metric.update_state(y_batch_train, logits)
+        if step % 100 == 0:
+            print(f'Epoch {epoch+1} Step {step} Loss {loss_value.numpy()} Accuracy {train_acc_metric.result().numpy()}')
+    train_acc = train_acc_metric.result()
+    print(f'Training accuracy over epoch {epoch+1}: {train_acc.numpy()}')
+    train_acc_metric.reset_states()
+
+# Evaluate the model on the validation dataset
+val_loss, val_accuracy = model.evaluate(val_data)
+
+# Print the validation loss and accuracy
+print("Validation Loss:", val_loss)
+print("Validation Accuracy:", val_accuracy)
 ```

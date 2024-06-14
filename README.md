@@ -317,6 +317,7 @@ import tensorflow_datasets as tfds
 import pennylane as qml
 import cirq
 import numpy as np
+import itertools
 from tensorflow.keras import layers, models
 
 # Load EuroSAT dataset

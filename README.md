@@ -303,8 +303,12 @@ Validation Accuracy: 0.1666666716337204
 ## For Running on IBM Quantum computer
 
 ```bash
-
-pip install qiskit pennylane tensorflow numpy matplotlib tensorflow_datasets
+#Create environment
+python -m venv /mnt/India/bioinfo/tests/qiskit-1.0-venv 
+source /mnt/India/bioinfo/tests/qiskit-1.0-venv/bin/activate
+#python
+pip install Cirq
+pip install pennylane tensorflow numpy matplotlib tensorflow_datasets pennylane-qiskit
 ```
 #### Step 2: Prepare the Data
 The data preparation part remains unchanged:
@@ -314,6 +318,7 @@ The data preparation part remains unchanged:
 import tensorflow as tf
 import tensorflow_datasets as tfds
 import pennylane as qml
+import cirq
 import numpy as np
 from tensorflow.keras import layers, models
 
@@ -328,54 +333,46 @@ def preprocess(image, label):
 
 train_data = train_data.map(preprocess).batch(32).prefetch(tf.data.experimental.AUTOTUNE)
 val_data = val_data.map(preprocess).batch(32)
+
 ```
 #### Step 3: Define the Quantum Layer
-Here we will use Qiskit to define the quantum layer and run the quantum circuit on an IBM Quantum computer. You'll need your IBM Quantum Experience API token.
-
-Set up Qiskit and authenticate:
 ```python
-
-from qiskit import Aer, IBMQ, transpile, assemble
-from qiskit.providers.ibmq import least_busy
-from qiskit.visualization import plot_histogram
-
-# Load your IBM Quantum Experience account
-IBMQ.save_account('YOUR_IBM_QUANTUM_API_TOKEN', overwrite=True)
-IBMQ.load_account()
-provider = IBMQ.get_provider(hub='ibm-q')
-```
-
-Define the quantum circuit and execute on IBM Quantum:
-```python
-
-def get_least_busy_backend():
-    backend = least_busy(provider.backends(filters=lambda x: x.configuration().n_qubits >= 4 and
-                                                    not x.configuration().simulator and x.status().operational==True))
-    print(f"Using backend: {backend}")
-    return backend
-
-def quantum_circuit(inputs):
-    backend = get_least_busy_backend()
-    circuit = qml.QNode(backend)
-
-    for i in range(n_qubits):
-        circuit.ry(inputs[i], wires=i)
-    circuit.cz(wires=[0, 1])
-    circuit.cz(wires=[2, 3])
-    for i in range(n_qubits):
-        circuit.ry(inputs[i], wires=i)
-    return [qml.expval(qml.PauliZ(i)) for i in range(n_qubits)]
-
 def quantum_layer(inputs):
     inputs = tf.cast(inputs, dtype=tf.float32)
-    outputs = np.array([quantum_circuit(input) for input in inputs])
-    outputs = outputs.astype(np.float32)  # Ensure the numpy array is float32
-    return tf.convert_to_tensor(outputs, dtype=tf.float32)
-Step 4: Define the Model
-This part remains the same with minor adjustments for using the quantum layer:
+    inputs_np = inputs.numpy()
+    outputs = np.array([quantum_circuit(input_np) for input_np in inputs_np])
+    outputs = outputs.astype(np.float32)
+    return tf.reshape(tf.convert_to_tensor(outputs, dtype=tf.float32), (-1, n_qubits))
 ```
-```python
 
+#### Define the quantum circuit and execute on IBM Quantum:
+```python
+n_qubits = 4
+simulator = cirq.Simulator()
+
+def quantum_circuit(inputs):
+    qubits = cirq.LineQubit.range(n_qubits)
+    circuit = cirq.Circuit()
+    for i, qubit in enumerate(qubits):
+        circuit.append(cirq.ry(float(inputs[i]))(qubit))  # Convert inputs to float
+    circuit.append(cirq.CZ(qubits[0], qubits[1]))
+    circuit.append(cirq.CZ(qubits[2], qubits[3]))
+    for i, qubit in enumerate(qubits):
+        circuit.append(cirq.ry(float(inputs[i]))(qubit))  # Convert inputs to float
+    circuit.append(cirq.measure(*qubits, key='m'))
+    result = simulator.run(circuit, repetitions=1000)
+    counts = result.histogram(key='m')
+    probabilities = np.zeros(2**n_qubits)
+    for i, state in enumerate(itertools.product([0, 1], repeat=n_qubits)):
+        qubit_indices = [i for i, q in enumerate(qubits) if state[i] == 1]
+        if len(qubit_indices) > 0:
+            state_str = ''.join(str(int(q)) for q in state)
+            probabilities[i] = counts[state_str] / 1000
+    return probabilities
+
+```
+#### Step 4: Define the hybrid model
+```python
 class HybridModel(tf.keras.Model):
     def __init__(self):
         super(HybridModel, self).__init__()
@@ -386,7 +383,6 @@ class HybridModel(tf.keras.Model):
         self.flatten = layers.Flatten()
         self.dense1 = layers.Dense(n_qubits, activation='relu')
         self.dense2 = layers.Dense(10, activation='softmax')
-
     def call(self, x):
         x = self.conv1(x)
         x = self.pool1(x)
@@ -394,11 +390,11 @@ class HybridModel(tf.keras.Model):
         x = self.pool2(x)
         x = self.flatten(x)
         x = self.dense1(x)
-        x = tf.numpy_function(quantum_layer, [x], tf.float32)
-        x.set_shape((None, n_qubits))  # Ensure shape is set for the output of quantum layer
+        x = quantum_layer(x)
         x = self.dense2(x)
         return x
 
+# Compile the model
 model = HybridModel()
 model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
 ```
@@ -407,7 +403,6 @@ Training and evaluation processes remain the same:
 
 ```python
 
-# Custom training loop
 loss_fn = tf.keras.losses.SparseCategoricalCrossentropy()
 optimizer = tf.keras.optimizers.Adam()
 train_acc_metric = tf.keras.metrics.SparseCategoricalAccuracy()
@@ -424,9 +419,9 @@ for epoch in range(epochs):
         optimizer.apply_gradients(zip(grads, model.trainable_weights))
         train_acc_metric.update_state(y_batch_train, logits)
         if step % 100 == 0:
-            print(f'Epoch {epoch+1} Step {step} Loss {loss_value.numpy()} Accuracy {train_acc_metric.result().numpy()}')
+            print(f"Epoch {epoch+1} Step {step} Loss {loss_value.numpy()} Accuracy {train_acc_metric.result().numpy()}")
     train_acc = train_acc_metric.result()
-    print(f'Training accuracy over epoch {epoch+1}: {train_acc.numpy()}')
+    print(f"Training accuracy over epoch {epoch+1}: {train_acc.numpy()}")
     train_acc_metric.reset_states()
 
 # Evaluate the model on the validation dataset
@@ -435,4 +430,9 @@ val_loss, val_accuracy = model.evaluate(val_data)
 # Print the validation loss and accuracy
 print("Validation Loss:", val_loss)
 print("Validation Accuracy:", val_accuracy)
+
+```
+### Results on Cirq Google Quantum Computer Simulator
+```
+Epoch 1 Step 300 Loss 2.3077473640441895 Accuracy 0.11503322422504425
 ```

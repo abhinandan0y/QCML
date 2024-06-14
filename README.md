@@ -1,9 +1,8 @@
 # QCML
 ## For running on Classical Systems
 To implement Hybrid Quantum Neural Networks for Remote Sensing Imagery Classification. 
-Also links to do analysis on remote sensing  image classification
 
-#### Familiarity with libraries such as Qiskit, Pennylane, TensorFlow, and Keras.
+#### Libraries required such as Qiskit, Pennylane, TensorFlow, and Keras.
 
 ```python
 pip install qiskit pennylane tensorflow numpy matplotlib
@@ -42,7 +41,7 @@ train_data = train_data.map(preprocess).batch(32).prefetch(tf.data.experimental.
 ```
 
 #### Step 3: Define the Quantum Layer
-#Here, we will define a simple quantum circuit using Pennylane.
+#Here, define a simple quantum circuit using Pennylane.
 
 ```python
 
@@ -69,7 +68,7 @@ def quantum_layer(inputs):
 ```
 
 #### Step 4: Integrate Quantum Layer with Classical Model
-#We integrate the quantum layer into a Keras model.
+#integrate the quantum layer into a Keras model.
 
 ```python
 
@@ -162,7 +161,7 @@ print("Loaded Model Validation Accuracy:", val_accuracy)
 ```
 
 #### Tain & Monitor Training Progress:
-You can use TensorBoard to monitor training progress. First, install TensorBoard using pip install tensorboard. Then, add the following code to your existing script to enable TensorBoard:
+TensorBoard is used to monitor training progress.
 
 ```bash
 #Start tensorboard
@@ -244,7 +243,6 @@ for epoch in range(epochs):
 <img src="https://github.com/abhinandan0y/QCML/blob/main/img/TrainAccLoss.png" style="width: 100%;" alt="TrainingResults.png">
 
 #### Step 5: Test/ Evaluate the Model
-#Evaluate the model's performance on a validation dataset.
 
 ```python
 
@@ -311,7 +309,6 @@ pip install Cirq
 pip install pennylane tensorflow numpy matplotlib tensorflow_datasets pennylane-qiskit
 ```
 #### Step 2: Prepare the Data
-The data preparation part remains unchanged:
 
 ```python
 
@@ -399,7 +396,6 @@ model = HybridModel()
 model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
 ```
 #### Step 5: Training and Evaluation
-Training and evaluation processes remain the same:
 
 ```python
 
@@ -435,4 +431,6 @@ print("Validation Accuracy:", val_accuracy)
 ### Results on Cirq Google Quantum Computer Simulator
 ```
 Epoch 1 Step 300 Loss 2.3077473640441895 Accuracy 0.11503322422504425
+
+**Training accuracy over epoch 1: 0.11074074357748032**
 ```

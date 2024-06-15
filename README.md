@@ -370,6 +370,8 @@ def quantum_circuit(inputs):
 
 ```
  <img src="https://github.com/abhinandan0y/QCML/upload/main/img/circuit_diagram.png" style="width: 100%;" alt="bioinformatics_lab.png">
+
+ 
 #### Step 4: Define the hybrid model
 ```python
 class HybridModel(tf.keras.Model):

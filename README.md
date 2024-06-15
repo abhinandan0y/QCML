@@ -343,7 +343,7 @@ def quantum_layer(inputs):
     return tf.reshape(tf.convert_to_tensor(outputs, dtype=tf.float32), (-1, n_qubits))
 ```
 
-#### Define the quantum circuit and execute on IBM Quantum:
+#### Define the quantum circuit and execute on Google Quantum Computer.
 ```python
 n_qubits = 4
 simulator = cirq.Simulator()

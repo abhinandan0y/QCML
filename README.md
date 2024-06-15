@@ -369,7 +369,7 @@ def quantum_circuit(inputs):
     return probabilities
 
 ```
- <img src="https://github.com/abhinandan0y/QCML/upload/main/img/circuit_diagram.png" style="width: 100%;" alt="bioinformatics_lab.png">
+ <img src="https://github.com/abhinandan0y/QCML/blob/main/img/circuit_diagram.png" style="width: 100%;" alt="circuit_diagram.png">
 
  
 #### Step 4: Define the hybrid model
